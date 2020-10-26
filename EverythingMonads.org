@@ -1,4 +1,4 @@
-#+TITLE: Everything I didn't know about Haskell
+#+TITLE: What I didn't know about Haskell
 #+AUTHOR: [[mailto:thibault@thb.lt][Thibault Polge]]
 
 #+LANGUAGE: en
@@ -21,6 +21,11 @@
 
 This document isn't the zillionth Monad tutorial; it is a log
 of my own study of Haskell's fundamental typeclasses.
+
+Goals of this document:
+
+ - Practical programming, not theory (although we may implement
+   natural numbers once or twice)
 
 * Typed, typeclasses, and monads
 ** Introduction: Monads are not a thing
@@ -488,8 +493,6 @@ Lists are Monads, too.  Since Monads don't introduce structure, they
 don't nest like fmap would.
 
 *** Writer
-
-
 
 *** Reader
 
