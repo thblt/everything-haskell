@@ -1,0 +1,596 @@
+#+TITLE: Everything I didn't know about Haskell
+#+AUTHOR: [[mailto:thibault@thb.lt][Thibault Polge]]
+
+#+LANGUAGE: en
+#+OPTIONS: ':t ^:nil
+
+#+SETUPFILE: Code/write-yourself-a-git/org-html-themes/setup/theme-readtheorg.setup
+
+#+begin_src elisp :results silent :exports none
+  (require 'ob-haskell)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((dot . t))) ; this line activates dot
+#+end_src
+
+#+begin_src haskell :exports none :results silent
+  :set +m
+  :set prompt "> "
+#+end_src
+
+This document isn't the zillionth Monad tutorial; it is a log
+of my own study of Haskell's fundamental typeclasses.
+
+* Typed, typeclasses, and monads
+** Introduction: Monads are not a thing
+
+Maybe one of the things that make monads difficult is that people,
+including myself, sometimes begin by trying to answer the wrong
+question.  The most common wrong question is, of course, “what are
+monads?”.  It's not wrong in itself: more accurately, it's a good
+question, but one you already know the answer to: Monad are
+=Applicative= of kind =* -> *= for which a lawful definition of =>>==
+and =return= exists.  What's wrong here is the assumption that the
+definition of the =Monad= typeclass is a complete answer to the
+question about the nature of monads, emphasis on the plural.  Hence,
+frustration.
+
+#+begin_src haskell :exports none :results silent
+  import Control.Applicative
+  import Control.Monad
+  import Data.Functor
+  import Data.Functor.Identity
+  import Data.Maybe
+#+end_src
+
+#+begin_src dot :file typeclasses.svg :export results
+  digraph {
+   Applicative[href=" #Applicative"]
+   Foldable[href="#Foldable"]
+   Functor[href="#Functor"]
+   Monad[href="#Monad"]
+   Monoid[href="#Monoid"]
+   Semigroup[href="#Semigroup"]
+   Traversable[href="#Traversable"]
+
+   Semigroup -> Monoid
+   Functor -> Applicative
+   Applicative -> Monad
+   Functor -> Traversable
+   Foldable -> Traversable
+  }
+#+end_src
+
+#+RESULTS:
+[[file:typeclasses.svg]]
+
+** Before Monad
+
+Since every =Monad= is an =Applicative=, every =Applicative= is a
+=Functor=, and =Monoid= is more useful than it may seem at first,
+let's just quickly review those typeclasses.
+
+*** The dot and the dollar
+
+Just remember that:
+
+#+begin_src haskell
+  (.) :: (b -> c) -> (a -> b) -> a -> c -- function composition
+  ($) :: (a -> b) -> a -> b             -- function application
+#+end_src
+
+We're going to need it later.
+
+*** Semigroup
+:PROPERTIES:
+:CUSTOM_ID: Semigroup
+:END:
+
+A type =a= is a =semigroup= iff it provides a *binary associative
+function* =<>= of type =a -> a -> a=.  Its only law is the
+associativity law:
+
+#+begin_example
+  (a <> b) <> c == a <> (b <> c)
+#+end_example
+
+Which implies, for example, that integers can be a semigroup under
+addition or substraction but not under division, since $(1/2)/3 \ne 1
+/ (2/3)$.
+
+Lots of things are semigroups.  Of some interest are the tuples'
+instances: =(a, b)=, =(a, b, c)= and =(a, b, c, d)= are
+Semigroups iff =a=, =b=, =c= and =d= are.  This allows to implement
+=<>= as:
+
+#+begin_src haskell
+  (a, b) <> (a', b') = (a <> a', b <> b')
+#+end_src
+
+*** Monoid
+
+A =Semigroup= is a =Monoid= if it has a *neutral element* =mempty=
+such as ~x <> mempty = x~ and ~mempty <> x = x~.
+
+#+begin_note
+  Historically, =Monoid= wasn't a =Semigroup= and the binary function
+  was called =mappend=.  You can still explicitly define =mappend=,
+  but “it is expected that the two functions [ =<>= and =mappend= ]
+  are defined the same way.” ([[https://hackage.haskell.org/package/base-4.14.0.0/docs/Data-Monoid.html][doc for Data.Monoid]])
+#+end_note
+
+*** Functor
+
+A type is a =Functor= if its kind is =* -> *= and it provides the
+mapping function =fmap=, whose infix synonym is =<$>=.  =<$>= is
+analogous to the basic =$= in that:
+
+#+begin_src haskell
+                ($)  :: (a -> b) ->   a ->   b
+  Functor f => (<$>) :: (a -> b) -> f a -> f b
+#+end_src
+
+There are a lot of analogies for functors, the most common one being
+the box analogy, and they all suck.  For example, =->= is a functor,
+and it isn't a box.
+
+**** The IO Functor
+
+Because IO is a Functor, we can =fmap= over a type wrapped in IO:
+
+#+begin_src haskell
+  fmap (+1) readLn -- readLn :: Read a => IO a
+  fmap ((++) "Hello") getLine
+  -- which can also be expressed as
+  ((++) "Hello") <$> getLine
+#+end_src
+
+**** The -> Functor
+
+Function application =->= is also a Functor:
+
+#+begin_src haskell
+  plus19 = (+) 19
+  show <$> plus19 $ 1
+#+end_src
+
+This is just =.= in new clothes, though!  The above example is strictly equivalent to
+~show . plus19 $ 1~.
+
+*** Foldable
+:PROPERTIES:
+:CUSTOM_ID: Foldable
+:END:
+
+A type is =Foldable= if its kind is =* -> *= and it can be folded to a
+summary value.  You define a =Foldable= by providing either =foldr= or
+=foldMap=, since each can be defined in terms of the other.  Their
+types are as follows:
+
+#+begin_src haskell
+  class Foldable (t :: * -> *) where
+    -- ...
+    foldMap :: Monoid m => (a -> m) -> t a -> m
+    foldr :: (a -> b -> b) -> b -> t a -> b
+#+end_src
+
+=foldMap= shows the intimate relationship that =Foldable= has with
+=Monoid=.  Given a =Foldable t= of =a= and a function that turns an
+=a= into a =Monoid m=, it folds =t= over the monoid of =m=:
+
+#+begin_src haskell
+  foldMap f = foldr (mappend . f) mempty
+  #+end_src
+
+It seems strange, though, that regular =foldr= can be derived from
+=foldMap=, since =foldr= doesn't have the =Monoid= constraint.  This
+is how =foldr= is defined in terms of =foldMap=:
+
+#+begin_src haskell
+  class Foldable (t :: * -> *) where
+    -- ...
+    foldr :: (a -> b -> b) -> b -> t a -> b
+    foldr f z t = appEndo (foldMap (Endo #. f) t) z
+#+end_src
+
+**** Wait, Endo?
+
+=Endo= comes from =Data.Monoid= and is a =newtype= of =a -> a= under the
+=Monoid= of function composition:
+
+#+begin_src haskell
+  newtype Endo a = Endo { appEndo :: a -> a }
+#+end_src
+
+By definition, in the =Monoid= of =Endo=, =<>= has the following type:
+
+#+begin_src haskell
+  (<>) :: Endo a -> Endo a -> Endo a
+#+end_src
+
+Since =Endo a= is just a compile-time wrapper for =a -> a=, this reads
+as:
+
+#+begin_src haskell
+  (<>) :: (a -> a) -> (a -> a) -> (a -> a)
+  -- The last pair of parentheses are irrelevant, so this is strictly
+  -- equivalent to:
+  (<>) :: (a -> a) -> (a -> a) -> a -> a
+#+end_src
+
+which is exactly the signature of =.= with all type variables being
+equal (so it can be said to be a /specialization/ of =.=, I guess?).
+
+Specializing =.= is exactly how =<>= is implemented:
+
+#+begin_src haskell
+  (<>) :: Endo a => a -> a -> a
+  (<>) = coerce ((.) :: (a -> a) -> (a -> a) -> (a -> a))
+#+end_src
+
+Let's read this from the inside to the outside.  ~(.) :: (a -> a) ->
+(a -> a) -> (a -> a)~ is the specialization of the function
+composition operator =.= so that all its type variables are the same.
+Then it wraps it all into [[#coerce][=coerce=]], which is a bit of type-checker
+magic that allows to manipulate a piece of data as a different type
+with the same underlying representation.
+
+What about the neutral element?  It's =id=, of course, in the =Endo= =newtype=:
+
+#+begin_src haskell
+  instance Monoid (Endo a) where
+    mempty = Endo id
+#+end_src
+
+**** Back to foldr
+
+=foldr= in terms of =foldMap= was written this way:
+
+#+begin_src haskell
+  class Foldable (t :: * -> *) where
+    -- ...
+    foldr :: (a -> b -> b) -> b -> t a -> b
+    foldr f z t = appEndo (foldMap (Endo #. f) t) z
+#+end_src
+
+Again, let's read this from the inside.  At the deeper level is ~(Endo
+#. f)~.  =#.= is a performance optimization for some edge cases of
+=.=, but it's technically identical, so this reads ~(Endo . f)~, which
+is simply composing the =Endo= constructor and the f argument.  Let's
+expand those types:
+
+#+begin_example
+  Endo                 . f
+  ((c -> c) -> Endo c) . (a -> (b -> b))
+  ^ That's the Endo      ^ That's from foldr's signature.
+    constructor
+#+end_example
+
+Because of the type signature of =.= itself, the return value of the
+second argument to =.= and the input of its first argument are
+actually the same type, so we have actually:
+
+#+begin_example
+  ((b -> b) -> Endo b) . (a -> (b -> b))
+#+end_example
+
+By applying the type of =.=, we finally get:
+
+#+begin_example
+  a -> Endo b
+#+end_example
+
+by composing the =Endo= constructor with the function argument of
+=foldr=, we now have a function that takes an =a=, the type of that
+=Foldable=, and returns a Monoidal fonction application.  Let's
+clarify this.  We're just taking the result value of the function
+argument of =foldr=, and turning it into an Endo, the Monoid of =a ->
+a= under function composition.
+
+Next step, the surrounding ~(foldMap (Endo #. f) t)~.  This is where
+=foldMap= comes into play.  Let's review its type:
+
+#+begin_src haskell
+  foldMap :: Monoid m => (a -> m) -> t a -> m
+#+end_src
+
+The first argument of this application of =foldMap= is the function
+that turns an element of =t a= into an =m= --- it's the composition of
+=Endo= and =f= we've just dissected.  The second argument is the
+=Foldable= itself.  Because our Monoid is the function composition
+Monoid, the result of this fold is a function (wrapped in the =Endo=
+newtype) of type ~b -> b~ (that's the =b= from the signature of
+=foldr=).
+
+All that remains is the outermost block: ~appEndo (foldMap (Endo #. f)
+t) z~.  Its job is to apply that result to the base value of the fold
+accumulator (the =z= argument to =foldr=).  =appEndo= “unwraps” the
+function from the =Endo=, and the resulting function is applied to
+=z= to get the final result of the fold
+
+**** Final words on Foldable
+
+*** Applicative
+
+An =Applicative= is a =Functor= providing a way to sequence
+computations and combine their result.  Making a type an Applicative
+requires /two/ definitions: =pure=, and either the “TIE Fighter”
+# @TODO The name comes from HPFFP apparently.
+operator =<*>= /or/ the =liftA2= function.
+
+=pure= “lifts” a value inside an Applicative.  It's the same function
+as =Monad='s =return=.  Here's how it works:
+
+#+begin_src haskell :results output :export both
+  import Data.Monoid
+  import Data.Void
+  --
+  pure 1 :: [Int]
+  pure 2 :: Maybe Int
+  pure 3 :: Either String Int
+  pure 4 :: IO Int -- The output here will be a bit strange because ghci
+                   -- prompt is in IO.  But it's IO 4.
+  pure 5 :: ([Int], Int) -- The tuple (a, b) is an Applicative iff a is
+                          -- a Monoid.  More on that later.
+#+end_src
+
+#+RESULTS:
+
+=Applicative= also lets you lift /applications/ inside the Functor.
+It's the job of the various =liftA*= function:s
+
+#+begin_src haskell
+  liftA  :: Applicative f => (a -> b) ->           f a -> f b -- Hey, that's fmap!
+  liftA2 :: Applicative f => (a -> b -> c) ->      f a -> f b -> f c
+  liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+#+end_src
+
+Lifting a unary function in an =Applicative= is the same as =fmap=
+(necessarily, since theorems are free!)
+# @TODO Reference here.
+
+Last but not least, the “TIE fighter” operator =<*>= looks the same as
+liftA, but with the function argument also lifted inside the
+=Applicative=.
+
+#+begin_src haskell
+  fmap  :: Functor f     =>   (a -> b) -> f a -> f b -- For comparison.
+  (<*>) :: Applicative f => f (a -> b) -> f a -> f b
+#+end_src
+
+#+begin_src haskell
+                     a  $  b ::   (a -> b) ->   a ->   b
+  Functor     f => f a <$> b ::   (a -> b) -> f a -> f b
+  Applicative f => f a <*> b :: f (a -> b) -> f a -> f b
+#+end_src
+
+=Applicative= is weaker than Monad, in that it doesn't provide the
+full binding power of =>>==, but it's still an interesting typeclass.
+
+#+begin_src haskell :results output :export both
+  let f1 x = "Hello, " ++ x
+
+  let f2 x = "You said: " ++ x ++ "?"
+
+  let af1 = Just f1
+
+  let af2 = Just f2
+
+  af1 <*> pure "World"
+#+end_src
+
+#+RESULTS:
+:
+: Prelude Control.Monad Control.Applicative Data.Functor Data.Maybe| > Prelude Control.Monad Control.Applicative Data.Functor Data.Maybe| > Prelude Control.Monad Control.Applicative Data.Functor Data.Maybe| > Just "Hello, World"
+
+**** The IO Applicative
+
+Like all monads, IO also has an Applicative instance, so you can do
+this kind of things:
+
+#+begin_src haskell
+  concatA = liftA2 (++)
+  getLine `concatA` getLine
+#+end_src
+
+Or, with the TIE fighter =<*>=:
+
+#+begin_src haskell
+  (++) <$> getLine <*> getLine
+#+end_src
+
+**** TODO Applicative do
+
+A GHC extension extends to =do= syntaxic sugar to Applicative.
+
+*** Traversable
+
+A =Foldable= =Functor= (that's a type that implements /both/ classes)
+is =Traversable= if it can be, guess what, traversed “from left to
+right”.
+
+#+begin_src haskell
+class (Functor t, Foldable t) => Traversable t where
+  traverse  :: Applicative f => (a -> f b) -> t a -> f (t b)
+  sequenceA :: Applicative f => t (f a) -> f (t a)
+#+end_src
+
+Let's start with =sequenceA=.  This function converts an Applicative
+wrapped in a Traversable into that Traversable wrapped in that
+Applicative. In other words, it swaps the order of layers.  Let's
+start with some very simple examples:
+
+#+begin_src haskell
+  sequenceA [Just 1, Just 2, Just 3]
+  sequenceA [Just 1, Nothing, Just 3]
+  sequenceA [getLine, getLine, getLine ]
+  sequenceA [putStr "Hello", putStr ", ", putStrLn "world!" ]
+#+end_src
+
+In the last example, though, we don't care about the result, so we can
+just use =sequenceA_=  from =Data.Foldable=, which doesn't need a Traversable:
+
+#+begin_src haskell
+  sequenceA_ [putStr "Hello", putStr ", ", putStrLn "world!" ]
+#+end_src
+
+Now on to =traverse=.  It takes two arguments, the second being a
+=Traversable= of =a=, and the first is a function that takes an =a=
+and returns a =f b=, where f is some Applicative.  The whole function
+returns a =f= of =(t b)=.  Too abstract?   Let's specialize
+it in various ways:
+
+#+begin_example
+  traverse :: (String -> Maybe Int) -> [a] -> Maybe [Int]
+  traverse :: (Int -> [Int]) -> Maybe Int -> [Maybe Int]
+#+end_example
+
+This looks a bit like =sequenceA=, but with some map elements added.
+Well, this is exactly what the default implementation is: ~traverse f
+= sequenceA . fmap f~
+
+** Monads!
+
+A Monad is an Applicative functor that defines a new operator called
+/bind/: =>>==, as follows:
+
+#+begin_src haskell
+class Applicative m => Monad (m :: * -> *) where
+  (>>=) :: m a -> (a -> m b) -> m b
+#+end_src
+
+=>>== is stupidly simple: it runs f “inside” a monad, and returns
+the modified monad.  Monads have laws:
+
+ - The left identity law :: states that ~rneturn a >>= f == f a~.
+ - The right identity law :: ~m >>= return == m~.
+ - The associativity law :: states that ~(m >>= f) >>= g~ and ~m >>=
+   (\x -> f x >>= g)~ are equivalent.
+
+*** The Identity Monad
+
+The most boring Monad of all is =Identity=.  It's just a =newtype= for
+any type, so it's not going to do a lot of interesting things.
+Identity will be useful in the contexts of Monad transformers, later.
+
+*** Maybe and Either
+
+#+begin_src haskell :exports both :results output :session
+  2+2
+  12*3
+  putStrLn "Hello, world!"
+#+end_src
+
+*** Lists
+
+Lists are Monads, too.  Since Monads don't introduce structure, they
+don't nest like fmap would.
+
+*** Writer
+
+
+
+*** Reader
+
+*** State
+*** do notation
+:PROPERTIES:
+:custom_id: do
+:END:
+
+In a nutshell, the do notation introduces an assignment syntax with
+=<-= that gets desugared as lambdas. Think of assigning to =x= as
+entering a scope where x is visible and defined, which is exactly what
+~\x -> …~ does.
+
+#+begin_src haskell
+  withDo = do
+    putStrLn "Who's player 1? "
+    x <- getLine
+    putStrLn $ "Hello, " ++ x ++ "! Who's player 2?"
+    y <- getLine
+    putStrLn $ "Hello, " ++ x ++ " and " ++ y
+    return (x, y)
+
+  withoutDo =
+    putStrLn "Who's player 1? " >>
+    getLine >>=
+    (\x -> putStrLn ("Hello " ++ x ++ "! Who's player 2?")
+           >> getLine >>=
+           (\y ->
+               putStrLn ("Hello " ++ x ++ " and " ++ y)
+               >>
+               return (x,y)))
+
+#+end_src
+
+* Beyond the type system
+
+** GADTs
+
+
+
+** Existentials and quantifiers
+
+** Type-level programming
+
+* Generics
+
+* Misc tools
+
+** coerce
+:PROPERTIES:
+:custom_id: coerce
+:END:
+
+=coerce= (from Data.Coerce) converts at compile-time between types
+with the same internal representation, for example =newtype= aliases
+of the same underlying type, or back and forth between the underlying
+type and =newtype= aliases:
+
+#+begin_src haskell :exports both
+  import Data.Coerce
+  import Data.Foldable
+  import Data.Monoid
+
+  let a = [10, 20, 30] :: [Sum Int]
+
+  fold a
+#+end_src
+
+#+RESULTS:
+: > > > Prelude Data.Monoid Data.Foldable Data.Coerce| > Sum {getSum = 60}
+
+#+begin_src haskell :exports both
+  fold (coerce a :: [Product Int])
+#+end_src
+
+#+RESULTS:
+: Product {getProduct = 6000}
+
+It's not technically a conversion function, as it cannot actually
+convert anything.  Informally, what it actually does is change the
+visible type of a piece of data to something else /if and only if/
+it's safe to do so, that is, if both types are internally the same.
+This won't work:
+
+#+begin_src haskell :exports both
+  import Data.Int
+
+  let x = 32 :: Int16
+
+  coerce x :: Int32
+#+end_src
+
+#+RESULTS:
+: > Prelude Data.Monoid Data.Foldable Data.Coerce Data.Int| >
+: <interactive>:229:1-8: error:
+:     • Couldn't match representation of type ‘Int16’
+:                                with that of ‘Int32’
+:         arising from a use of ‘coerce’
+:     • In the expression: coerce x :: Int32
+:       In an equation for ‘it’: it = coerce x :: Int32
+
+#  LocalWords:  typeclass typeclasses zillionth monoids Semigroup
+#  LocalWords:  foldr catamorphism monoid Semigroups
