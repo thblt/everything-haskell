@@ -19,8 +19,8 @@
   :set prompt "> "
 #+end_src
 
-This document isn't the zillionth Monad tutorial; it is a log
-of my own study of Haskell's fundamental typeclasses.
+This document isn't the zillionth Monad tutorial; it is a log of my
+own study of Haskell's beyond the fundamentals.
 
 Goals of this document:
 
@@ -527,7 +527,7 @@ entering a scope where x is visible and defined, which is exactly what
                return (x,y)))
 
 #+end_src
-
+** Transformers!
 * Beyond the type system
 
 ** GADTs
