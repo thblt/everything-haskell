@@ -1,4 +1,4 @@
-#+TITLE: What I didn't know about Haskell
+#+TITLE: What I still don't know about Haskell
 #+AUTHOR: [[mailto:thibault@thb.lt][Thibault Polge]]
 
 #+LANGUAGE: en
