@@ -27,7 +27,61 @@ Goals of this document:
  - Practical programming, not theory (although we may implement
    natural numbers once or twice)
 
-* Typed, typeclasses, and monads
+* Types, typeclasses, and monads
+** The overlapping instances problem
+
+The gist is below. Of note is:
+
+ - OverlappingInstances is deprecated, the correct way is to use the
+   {-# OVERLAP* #-} pragmas, as in:
+
+#+begin_src haskell
+  {-# LANGUAGE FlexibleContexts #-}
+  {-# LANGUAGE FlexibleInstances #-}
+
+  import Control.Monad.Writer
+
+  type MyMonad = Maybe
+
+  class ToMyMonad a where
+    compile :: a -> MyMonad Int
+
+  compileAdd :: Int -> Maybe Int -> Maybe Int
+  compileAdd a (Just b) = Just (a + b)
+  compileAdd _ Nothing = Nothing
+
+  instance {-# OVERLAPPABLE #-} (Foldable f, ToMyMonad m) => ToMyMonad (f m) where
+    compile = foldM (\a b -> compileAdd a (compile b)) 0
+
+  instance {-# OVERLAPPING #-} ToMyMonad (MyMonad Int) where
+    compile = id
+
+  counting :: [Int]
+  counting = [1..10]
+
+  fail1 = compile $ Just (1 :: Int)
+#+end_src
+
+IRC convo with the root of the problem:
+
+#+begin_exemple
+<thblt> I'm hitting a ghci error I really don't understand:
+https://paste.thb.lt/1619798378.hs.html I don't get why instance
+(Foldable f, ToMyMonad m) => ToMyMonad (f m) overlaps here --- or
+maybe I just don't get the error.
+<opqdonut> thblt: they overlap because the heads of the instances
+`MyMonad ()` and `f m` both match `MyMonad ()` aka `Maybe ()`
+<opqdonut> that's the way GHC instance resolution works: it wants a
+unique instance to match, and _then_ it tries to satisfy the
+prerequisites of that instance (the stuff left of the => arrow)
+<opqdonut> if you want it to track down multiple matching instances
+you want OverlappingInstances or some other extension
+<opqdonut>
+https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html
+the docs for this are pretty good
+<thblt> opqdonut: thank you!
+#+end_exemple
+
 ** Introduction: Monads are not a thing
 
 Maybe one of the things that make monads difficult is that people,
