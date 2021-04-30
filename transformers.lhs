@@ -46,9 +46,6 @@ Let's begin by the config type.
 >     , msgTooManyAttempts = "Sorry, you don't have any more tries!"
 >     , msgVictory = "*Trumpets* YOU WIN!" }
 
-> defaultConf :: GConf
-> defaultConf = def
-
 Now for a runtime state.
 
 > data GState = GState
@@ -126,5 +123,5 @@ it, updates the state, and returns a bool.
 
 > main :: IO ()
 > main = do
->   runStateT (runReaderT play defaultConf)  (mkState 33)
+>   runStateT (runReaderT play def)  (mkState 33)
 >   return ()
