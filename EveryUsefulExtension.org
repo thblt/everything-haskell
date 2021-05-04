@@ -1,5 +1,20 @@
 #+TITLE: What do all these extensions do?
 
+The :rio: label means the extension is one of the [[https://github.com/commercialhaskell/rio/#language-extensions][recommended RIO default extensions set]].  :rio_norecom: is for those that they deem “perfectly fine to use as well, but are not recommended to be turned on by default”
+
+* TODO =ApplicativeDo=
+
+Do-notation for =Functor= and =Applicative=.
+
+#+begin_src haskell :tangle src/Every/Extension/ApplicativeDo.hs
+  {-# LANGUAGE ApplicativeDo #-}
+
+  func :: Functor f => f Bool -> f Bool
+  func b = do
+    x <- b
+    return (not x)
+#+end_src
+
 * TODO =AutoDeriveTypeable=                                             :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/AutoDeriveTypeable.hs
@@ -194,7 +209,7 @@ data Term a where
 * TODO =LambdaCase=                                                     :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/LambdaCase.hs
-{-# LANGUAGE LambdaCase #-}
+  {-# LANGUAGE LambdaCase #-}
 #+end_src
 
 * TODO =MagicHash=                                              :rio_norecom:
@@ -315,10 +330,53 @@ This is implied if the import of the Prelude, or of parts of the Prelude, is mad
 {-# LANGUAGE RankNTypes #-}
 #+end_src
 
-* TODO =RecordWildCards=                                                :rio:
+* DONE =RecordWildCards=                                                :rio:
+
+A simple extension to automatically bind all record accessors on
+pattern match.
 
 #+begin_src haskell :tangle src/Every/Extension/RecordWildCards.hs
-{-# LANGUAGE RecordWildCards #-}
+  {-# LANGUAGE RecordWildCards #-}
+
+  data Book = Book
+    {
+      bookTitle  :: String
+    , bookAuthor :: String
+    , bookYear   :: Int
+    , bookGreat :: Bool }
+    deriving (Show)
+
+  -- It works when accessing data
+  tellMeAbout :: Book -> String
+  tellMeAbout Book{..} = concat
+    [ "It's "
+    , bookTitle
+    , " by "
+    , bookAuthor
+    , "published in "
+    , (show bookYear)
+    , (if bookGreat then ". It was great!" else ". It was meh.") ]
+
+  -- And when creating it
+  makeBook :: Book
+  makeBook = let
+    bookTitle = "Some other book"
+    bookAuthor = "Jean-Michel Écrivain"
+    bookYear = 2011
+    bookGreat = False
+    in Book{..}
+
+  -- Makes more sense in do-blocks, though.
+  readBook :: IO Book
+  readBook = do
+    bookTitle <- getLine
+    bookAuthor <- getLine
+    bookYear <- readLn
+    let bookGreat = True
+    return Book{..}
+
+
+  book = Book "The Wizard of Oz" "L. Frank Baum" 1900 True
 #+end_src
 
 * TODO =ScopedTypeVariables=                                            :rio:
