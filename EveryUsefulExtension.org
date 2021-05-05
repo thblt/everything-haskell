@@ -2,7 +2,7 @@
 
 The :rio: label means the extension is one of the [[https://github.com/commercialhaskell/rio/#language-extensions][recommended RIO default extensions set]].  :rio_norecom: is for those that they deem “perfectly fine to use as well, but are not recommended to be turned on by default”
 
-* TODO =ApplicativeDo=
+* DONE =ApplicativeDo=
 
 Do-notation for =Functor= and =Applicative=.
 
@@ -18,7 +18,7 @@ Do-notation for =Functor= and =Applicative=.
 * TODO =AutoDeriveTypeable=                                             :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/AutoDeriveTypeable.hs
-{-# LANGUAGE  AutoDeriveTypeable #-}
+  {-# LANGUAGE  AutoDeriveTypeable #-}
 #+end_src
 
 * TODO =BangPatterns=                                                   :rio:
@@ -58,8 +58,6 @@ Run the C preprocessor on the file before compilation.
 
 * TODO =DataKinds=                                                      :rio:
 
-
-
 #+begin_src haskell :tangle src/Every/Extension/DataKinds.hs
 {-# LANGUAGE DataKinds #-}
 #+end_src
@@ -84,7 +82,7 @@ Allow to automatically derive /any/ class.  This looks a bit dangerous.
 {-# LANGUAGE DeriveDataTypeable #-}
 #+end_src
 
-* TODO =DeriveFoldable=                                                 :rio:
+* DONE =DeriveFoldable=                                                 :rio:
 
 Make =Foldable= instances automatically derivable.
 
@@ -99,7 +97,7 @@ Make =Foldable= instances automatically derivable.
          in putStrLn . show $ sum list
 #+end_src
 
-* TODO =DeriveFunctor=                                                  :rio:
+* DONE =DeriveFunctor=                                                  :rio:
 
 Make =Functor= instances automatically derivable.
 
@@ -172,7 +170,7 @@ Make =Functor= instances automatically derivable.
 {-# LANGUAGE FunctionalDependencies #-}
 #+end_src
 
-* TODO =GADTs=                                                          :rio:
+* DONE =GADTs=                                                          :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/GADTs.hs
 {-# LANGUAGE GADTs #-}
@@ -185,7 +183,6 @@ data Term a where
     IsZero :: Term Int -> Term Bool
     If     :: Term Bool -> Term a -> Term a -> Term a
     Pair   :: Term a -> Term b -> Term (a,b)
-
 #+end_src
 
 * TODO =GeneralizedNewtypeDeriving=                                     :rio:
@@ -206,10 +203,18 @@ data Term a where
 {-# LANGUAGE KindSignatures #-}
 #+end_src
 
-* TODO =LambdaCase=                                                     :rio:
+* =LambdaCase=                                                          :rio:
+
+A shorthand for ~\x -> case x of …~
 
 #+begin_src haskell :tangle src/Every/Extension/LambdaCase.hs
   {-# LANGUAGE LambdaCase #-}
+
+  annotedIntegers = fmap (\case 0 -> "Nothing"
+                                1 -> "Unit"
+                                13 -> "Thirteen"
+                                42 -> "Yeah sure"
+                                x -> "Plain old " ++ show x) [1..]
 #+end_src
 
 * TODO =MagicHash=                                              :rio_norecom:
@@ -252,10 +257,19 @@ can use =otherwise=.
 
 #+end_src
 
-* TODO =NamedFieldPuns=                                                 :rio:
+* DONE =NamedFieldPuns=                                                 :rio:
+
+Name elision.
 
 #+begin_src haskell :tangle src/Every/Extension/NamedFieldPuns.hs
-{-# LANGUAGE NamedFieldPuns #-}
+  {-# LANGUAGE NamedFieldPuns #-}
+
+  data D = D { a :: Int
+             , b :: String }
+    deriving (Show)
+
+  d = let a = 1+12
+      in D { b = "Whatever", a} -- Here.
 #+end_src
 
 * DONE =NoImplicitPrelude=                                              :rio:
@@ -300,10 +314,16 @@ This is implied if the import of the Prelude, or of parts of the Prelude, is mad
 {-# LANGUAGE PackageImports #-}
 #+end_src
 
-* TODO =PartialTypeSignatures=                                          :rio:
+* DONE =PartialTypeSignatures=                                          :rio:
+
+Does as its name says.  Useful for simplifying signatures to the point
+that really matters.
 
 #+begin_src haskell :tangle src/Every/Extension/PartialTypeSignatures.hs
-{-# LANGUAGE PartialTypeSignatures #-}
+  {-# LANGUAGE PartialTypeSignatures #-}
+
+  func :: _ -> Bool
+  func = not
 #+end_src
 
 * TODO =PatternGuards=                                                  :rio:
