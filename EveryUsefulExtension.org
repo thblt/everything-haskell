@@ -1,0 +1,468 @@
+#+TITLE: What do all these extensions do?
+
+The :rio: label means the extension is one of the [[https://github.com/commercialhaskell/rio/#language-extensions][recommended RIO default extensions set]].  :rio_norecom: is for those that they deem “perfectly fine to use as well, but are not recommended to be turned on by default”
+
+* DONE =ApplicativeDo=
+
+Do-notation for =Functor= and =Applicative=.
+
+#+begin_src haskell :tangle src/Every/Extension/ApplicativeDo.hs
+  {-# LANGUAGE ApplicativeDo #-}
+
+  func :: Functor f => f Bool -> f Bool
+  func b = do
+    x <- b
+    return (not x)
+#+end_src
+
+* TODO =AutoDeriveTypeable=                                             :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/AutoDeriveTypeable.hs
+  {-# LANGUAGE  AutoDeriveTypeable #-}
+#+end_src
+
+* TODO =BangPatterns=                                                   :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/BangPatterns.hs
+{-# LANGUAGE BangPatterns #-}
+#+end_src
+
+* DONE =BinaryLiterals=                                                 :rio:
+
+Allow the use of binary notation in integer literals.
+
+#+begin_src haskell :tangle src/Every/Extension/BinaryLiterals.hs
+  {-# LANGUAGE BinaryLiterals #-}
+
+  main = putStrLn $ show (0b10 + 0b10)
+#+end_src
+
+* DONE =CPP=                                                    :rio_norecom:
+
+Run the C preprocessor on the file before compilation.
+
+#+begin_src haskell :tangle src/Every/Extension/CPP.hs
+  {-# LANGUAGE CPP #-}
+
+  #define HELLO "Hello, world!"
+  #define SAY putStrLn
+
+  main = SAY HELLO
+#+end_src
+
+* TODO =ConstraintKinds=                                                :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/ConstraintKinds.hs
+{-# LANGUAGE ConstraintKinds #-}
+#+end_src
+
+* TODO =DataKinds=                                                      :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DataKinds.hs
+{-# LANGUAGE DataKinds #-}
+#+end_src
+
+* TODO =DefaultSignatures=                                              :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DefaultSignatures.hs
+{-# LANGUAGE DefaultSignatures #-}
+#+end_src
+
+* TODO =DeriveAnyClass=                                         :rio_norecom:
+
+Allow to automatically derive /any/ class.  This looks a bit dangerous.
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveAnyClass.hs
+{-# LANGUAGE DeriveAnyClass #-}
+#+end_src
+
+* TODO =DeriveDataTypeable=                                             :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveDataTypeable.hs
+{-# LANGUAGE DeriveDataTypeable #-}
+#+end_src
+
+* DONE =DeriveFoldable=                                                 :rio:
+
+Make =Foldable= instances automatically derivable.
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveFoldable.hs
+  {-# LANGUAGE DeriveFoldable #-}
+
+  data List a = Cons a (List a)
+              | Nil
+    deriving (Foldable, Show)
+
+  main = let list = Cons 1 (Cons 2 (Cons 3 Nil ))
+         in putStrLn . show $ sum list
+#+end_src
+
+* DONE =DeriveFunctor=                                                  :rio:
+
+Make =Functor= instances automatically derivable.
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveFunctor.hs
+  {-# LANGUAGE DeriveFunctor #-}
+
+  data D a = D a deriving (Functor, Show)
+
+  main = let d' = fmap (+ 1) (D 1) in
+    putStrLn $ show d'
+#+end_src
+
+* TODO =DeriveGeneric=                                                  :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveGeneric.hs
+{-# LANGUAGE DeriveGeneric #-}
+#+end_src
+
+* TODO =DeriveLift=                                             :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveLift.hs
+{-# LANGUAGE DeriveLift #-}
+#+end_src
+
+* TODO =DeriveTraversable=                                              :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DeriveTraversable.hs
+{-# LANGUAGE DeriveTraversable #-}
+#+end_src
+
+* TODO =DoAndIfThenElse=                                                :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/DoAndIfThenElse.hs
+{-# LANGUAGE DoAndIfThenElse #-}
+#+end_src
+
+* TODO =EmptyDataDecls=                                                 :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/EmptyDataDecls.hs
+{-# LANGUAGE EmptyDataDecls #-}
+#+end_src
+
+* TODO =ExistentialQuantification=                                      :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/ExistentialQuantification.hs
+{-# LANGUAGE ExistentialQuantification #-}
+#+end_src
+
+* TODO =FlexibleContexts=                                               :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/FlexibleContexts.hs
+{-# LANGUAGE FlexibleContexts #-}
+#+end_src
+
+* TODO =FlexibleInstances=                                              :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/FlexibleInstances.hs
+{-# LANGUAGE FlexibleInstances #-}
+#+end_src
+
+* TODO =ForeignFunctionInterface=                               :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/ForeignFunctionInterface.hs
+{-# LANGUAGE ForeignFunctionInterface #-}
+#+end_src
+
+* TODO =FunctionalDependencies=                                         :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/FunctionalDependencies.hs
+{-# LANGUAGE FunctionalDependencies #-}
+#+end_src
+
+* DONE =GADTs=                                                          :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/GADTs.hs
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE EmptyDataDeriving #-}
+
+data Term a where
+    Lit    :: Int -> Term Int
+    Succ   :: Term Int -> Term Int
+    IsZero :: Term Int -> Term Bool
+    If     :: Term Bool -> Term a -> Term a -> Term a
+    Pair   :: Term a -> Term b -> Term (a,b)
+#+end_src
+
+* TODO =GeneralizedNewtypeDeriving=                                     :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/GeneralizedNewtypeDeriving.hs
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+#+end_src
+
+* TODO =InstanceSigs=                                                   :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/InstanceSigs.hs
+{-# LANGUAGE InstanceSigs #-}
+#+end_src
+
+* TODO =KindSignatures=                                                 :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/KindSignatures.hs
+{-# LANGUAGE KindSignatures #-}
+#+end_src
+
+* =LambdaCase=                                                          :rio:
+
+A shorthand for ~\x -> case x of …~
+
+#+begin_src haskell :tangle src/Every/Extension/LambdaCase.hs
+  {-# LANGUAGE LambdaCase #-}
+
+  annotedIntegers = fmap (\case 0 -> "Nothing"
+                                1 -> "Unit"
+                                13 -> "Thirteen"
+                                42 -> "Yeah sure"
+                                x -> "Plain old " ++ show x) [1..]
+#+end_src
+
+* TODO =MagicHash=                                              :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/MagicHash.hs
+{-# LANGUAGE MagicHash #-}
+#+end_src
+
+* TODO =MonadFailDesugaring=                                            :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/MonadFailDesugaring.hs
+{-# LANGUAGE MonadFailDesugaring #-}
+#+end_src
+
+* TODO =MultiParamTypeClasses=                                          :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/MultiParamTypeClasses.hs
+{-# LANGUAGE MultiParamTypeClasses #-}
+#+end_src
+
+* DONE =MultiWayIf=                                                     :rio:
+
+If with multiple branches.  There's no =else= in this syntax, but you
+can use =otherwise=.
+
+#+begin_src haskell :tangle src/Every/Extension/MultiWayIf.hs
+  {-# LANGUAGE MultiWayIf #-}
+
+  test :: Int -> String
+  test a = if | a == 1 -> "Absolute unit."
+              | (a `mod` 17) == 0 -> "Some multiple of seventeen."
+              | a == 13 -> "Lucky thirteen."
+              | a == 42 -> "Forty-two, of geeky fame."
+              | otherwise -> "Just some boring number."
+
+  main = do
+    putStrLn "Enter a  number: "
+    number <- readLn
+    putStrLn $ test number
+
+#+end_src
+
+* DONE =NamedFieldPuns=                                                 :rio:
+
+Name elision.
+
+#+begin_src haskell :tangle src/Every/Extension/NamedFieldPuns.hs
+  {-# LANGUAGE NamedFieldPuns #-}
+
+  data D = D { a :: Int
+             , b :: String }
+    deriving (Show)
+
+  d = let a = 1+12
+      in D { b = "Whatever", a} -- Here.
+#+end_src
+
+* DONE =NoImplicitPrelude=                                              :rio:
+
+Do not import the implicit Prelude.
+
+#+begin_src haskell :tangle src/Every/Extension/NoImplicitPrelude.hs
+  {-# LANGUAGE NoImplicitPrelude #-}
+
+  import Data.Maybe (Maybe (..), fromJust)
+  import System.IO (putStrLn)
+
+  head :: [a] -> Maybe a
+  head [] = Nothing
+  head (x:xs) = Just x
+
+  (.) :: (b -> c) -> (a -> b) -> a -> c
+  (.) a b = \x -> a (b x)
+
+  ($) :: (a -> b) -> a -> b
+  ($) a = a
+
+
+  main = putStrLn . fromJust . head $ ["Hello, world!", "Hello, people!", "Hello, you!"]
+#+end_src
+
+This is implied if the import of the Prelude, or of parts of the Prelude, is made explicit:
+
+#+begin_src haskell
+  import Prelude (($), (.))
+#+end_src
+
+* TODO =OverloadedStrings=                                              :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/OverloadedStrings.hs
+{-# LANGUAGE OverloadedStrings #-}
+#+end_src
+
+* TODO =PackageImports=                                         :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/PackageImports.hs
+{-# LANGUAGE PackageImports #-}
+#+end_src
+
+* DONE =PartialTypeSignatures=                                          :rio:
+
+Does as its name says.  Useful for simplifying signatures to the point
+that really matters.
+
+#+begin_src haskell :tangle src/Every/Extension/PartialTypeSignatures.hs
+  {-# LANGUAGE PartialTypeSignatures #-}
+
+  func :: _ -> Bool
+  func = not
+#+end_src
+
+* TODO =PatternGuards=                                                  :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/PatternGuards.hs
+{-# LANGUAGE PatternGuards #-}
+#+end_src
+
+* TODO =PolyKinds=                                                      :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/PolyKinds.hs
+{-# LANGUAGE PolyKinds #-}
+#+end_src
+
+* TODO =QuasiQuotes=                                            :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/QuasiQuotes.hs
+{-# LANGUAGE QuasiQuotes #-}
+#+end_src
+
+* TODO =RankNTypes=                                                     :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/RankNTypes.hs
+{-# LANGUAGE RankNTypes #-}
+#+end_src
+
+* DONE =RecordWildCards=                                                :rio:
+
+A simple extension to automatically bind all record accessors on
+pattern match.
+
+#+begin_src haskell :tangle src/Every/Extension/RecordWildCards.hs
+  {-# LANGUAGE RecordWildCards #-}
+
+  data Book = Book
+    {
+      bookTitle  :: String
+    , bookAuthor :: String
+    , bookYear   :: Int
+    , bookGreat :: Bool }
+    deriving (Show)
+
+  -- It works when accessing data
+  tellMeAbout :: Book -> String
+  tellMeAbout Book{..} = concat
+    [ "It's "
+    , bookTitle
+    , " by "
+    , bookAuthor
+    , "published in "
+    , (show bookYear)
+    , (if bookGreat then ". It was great!" else ". It was meh.") ]
+
+  -- And when creating it
+  makeBook :: Book
+  makeBook = let
+    bookTitle = "Some other book"
+    bookAuthor = "Jean-Michel Écrivain"
+    bookYear = 2011
+    bookGreat = False
+    in Book{..}
+
+  -- Makes more sense in do-blocks, though.
+  readBook :: IO Book
+  readBook = do
+    bookTitle <- getLine
+    bookAuthor <- getLine
+    bookYear <- readLn
+    let bookGreat = True
+    return Book{..}
+
+
+  book = Book "The Wizard of Oz" "L. Frank Baum" 1900 True
+#+end_src
+
+* TODO =ScopedTypeVariables=                                            :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/ScopedTypeVariables.hs
+{-# LANGUAGE ScopedTypeVariables #-}
+#+end_src
+
+* TODO =StandaloneDeriving=                                             :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/StandaloneDeriving.hs
+{-# LANGUAGE StandaloneDeriving #-}
+#+end_src
+
+* TODO =StaticPointers=                                         :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/StaticPointers.hs
+{-# LANGUAGE StaticPointers #-}
+#+end_src
+
+* TODO =TemplateHaskell=                                        :rio_norecom:
+
+Metaprogramming.  This is one of the complex ones,
+
+#+begin_src haskell :tangle src/Every/Extension/TemplateHaskell.hs
+{-# LANGUAGE TemplateHaskell #-}
+#+end_src
+
+* TODO =TupleSections=                                                  :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/TupleSections.hs
+{-# LANGUAGE TupleSections #-}
+#+end_src
+
+* TODO =TypeFamilies=                                                   :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/TypeFamilies.hs
+{-# LANGUAGE TypeFamilies #-}
+#+end_src
+
+* TODO =TypeOperators=                                          :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/TypeOperators.hs
+{-# LANGUAGE TypeOperators #-}
+#+end_src
+
+* TODO =TypeSynonymInstances=                                           :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/TypeSynonymInstances.hs
+{-# LANGUAGE TypeSynonymInstances #-}
+#+end_src
+
+* TODO =UnboxedTuples=                                          :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/UnboxedTuples.hs
+{-# LANGUAGE UnboxedTuples #-}
+#+end_src
+
+* TODO =UnliftedFFITypes=                                       :rio_norecom:
+
+#+begin_src haskell :tangle src/Every/Extension/UnliftedFFITypes.hs
+{-# LANGUAGE UnliftedFFITypes #-}
+#+end_src
+
+* TODO =ViewPatterns=                                                   :rio:
+
+#+begin_src haskell :tangle src/Every/Extension/ViewPatterns.hs
+{-# LANGUAGE ViewPatterns #-}
+#+end_src
