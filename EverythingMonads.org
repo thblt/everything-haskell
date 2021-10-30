@@ -4,8 +4,6 @@
 #+LANGUAGE: en
 #+OPTIONS: ':t ^:nil
 
-#+SETUPFILE: Code/write-yourself-a-git/org-html-themes/setup/theme-readtheorg.setup
-
 #+begin_src elisp :results silent :exports none
   (require 'ob-haskell)
 
@@ -23,7 +21,7 @@ This document isn't the zillionth Monad tutorial; it is a log of my
 own study of Haskell's beyond the fundamentals.
 
 Goals of this document:
-
+	
  - Practical programming, not theory (although we may implement
    natural numbers once or twice)
 
@@ -591,7 +589,12 @@ In a Nutshell, type families allow to compile
 From the Haskell Wiki:
 
 #+begin_quote
-  An indexed type family in type theory is a partial function at the type level. Applying the function to parameters (called type indices) yields a type. Type families permit a program to compute what data constructors it will operate on, rather than having them fixed statically (as with simple type systems) or treated as opaque unknowns (as with parametrically polymorphic types).
+  An indexed type family in type theory is a partial function at the
+  type level. Applying the function to parameters (called type
+  indices) yields a type. Type families permit a program to compute
+  what data constructors it will operate on, rather than having them
+  fixed statically (as with simple type systems) or treated as opaque
+  unknowns (as with parametrically polymorphic types).a
 #+end_quote
 
 ** GADTs

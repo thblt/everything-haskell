@@ -2,12 +2,40 @@
 
 The :rio: label means the extension is one of the [[https://github.com/commercialhaskell/rio/#language-extensions][recommended RIO default extensions set]].  :rio_norecom: is for those that they deem “perfectly fine to use as well, but are not recommended to be turned on by default”
 
+* TODO =AllowAmbiguousTypes=
+
+IIUC, a type is “ambiguous” iff a variable in its context that doesn't appear in the body.
+
+Example borrowed from /Thinking in Types/.
+
+#+begin_src haskell :tangle src/Every/Extension/AllowAmbiguousTypes.hs
+  {-# LANGUAGE AllowAmbiguousTypes #-}
+  {-# LANGUAGE ScopedTypeVariables #-}
+  {-# LANGUAGE TypeApplications #-}
+
+  module Every.Extension.AmbiguousTypes where
+
+  import Data.Typeable
+
+  -- Actually makes sense.
+  typeName :: forall a. Typeable a => String
+  typeName = show . typeRep $ (Proxy @a)
+  -- To use: typeName @Bool
+
+  -- Doesn't make as much sense
+  weird :: Num a => String -> Bool
+  weird [] = False
+  weird _ = True
+#+end_src
+
 * DONE =ApplicativeDo=
 
 Do-notation for =Functor= and =Applicative=.
 
 #+begin_src haskell :tangle src/Every/Extension/ApplicativeDo.hs
   {-# LANGUAGE ApplicativeDo #-}
+
+  module Every.Extension.ApplicativeDo where
 
   func :: Functor f => f Bool -> f Bool
   func b = do
@@ -24,7 +52,9 @@ Do-notation for =Functor= and =Applicative=.
 * TODO =BangPatterns=                                                   :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/BangPatterns.hs
-{-# LANGUAGE BangPatterns #-}
+  {-# LANGUAGE BangPatterns #-}
+
+  module Every.Extension.BangPatterns where
 #+end_src
 
 * DONE =BinaryLiterals=                                                 :rio:
@@ -33,6 +63,8 @@ Allow the use of binary notation in integer literals.
 
 #+begin_src haskell :tangle src/Every/Extension/BinaryLiterals.hs
   {-# LANGUAGE BinaryLiterals #-}
+
+  module Every.Extension.BinaryLiterals where
 
   main = putStrLn $ show (0b10 + 0b10)
 #+end_src
@@ -44,6 +76,8 @@ Run the C preprocessor on the file before compilation.
 #+begin_src haskell :tangle src/Every/Extension/CPP.hs
   {-# LANGUAGE CPP #-}
 
+  module Every.Extension.CPP where
+
   #define HELLO "Hello, world!"
   #define SAY putStrLn
 
@@ -53,19 +87,25 @@ Run the C preprocessor on the file before compilation.
 * TODO =ConstraintKinds=                                                :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/ConstraintKinds.hs
-{-# LANGUAGE ConstraintKinds #-}
+  {-# LANGUAGE ConstraintKinds #-}
+
+  module Every.Extension.ConstraintKinds where
 #+end_src
 
 * TODO =DataKinds=                                                      :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DataKinds.hs
-{-# LANGUAGE DataKinds #-}
+  {-# LANGUAGE DataKinds #-}
+
+  module Every.Extension.DataKinds where
 #+end_src
 
 * TODO =DefaultSignatures=                                              :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DefaultSignatures.hs
-{-# LANGUAGE DefaultSignatures #-}
+  {-# LANGUAGE DefaultSignatures #-}
+
+  module Every.Extension.DefaultSignatures where
 #+end_src
 
 * TODO =DeriveAnyClass=                                         :rio_norecom:
@@ -73,13 +113,17 @@ Run the C preprocessor on the file before compilation.
 Allow to automatically derive /any/ class.  This looks a bit dangerous.
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveAnyClass.hs
-{-# LANGUAGE DeriveAnyClass #-}
+  {-# LANGUAGE DeriveAnyClass #-}
+
+  module Every.Extension.DeriveAnyClass where
 #+end_src
 
 * TODO =DeriveDataTypeable=                                             :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveDataTypeable.hs
-{-# LANGUAGE DeriveDataTypeable #-}
+  {-# LANGUAGE DeriveDataTypeable #-}
+
+  module Every.Extension.DeriveDataTypeable where
 #+end_src
 
 * DONE =DeriveFoldable=                                                 :rio:
@@ -88,6 +132,8 @@ Make =Foldable= instances automatically derivable.
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveFoldable.hs
   {-# LANGUAGE DeriveFoldable #-}
+
+  module Every.Extension.DeriveFoldable where
 
   data List a = Cons a (List a)
               | Nil
@@ -104,6 +150,8 @@ Make =Functor= instances automatically derivable.
 #+begin_src haskell :tangle src/Every/Extension/DeriveFunctor.hs
   {-# LANGUAGE DeriveFunctor #-}
 
+  module Every.Extension.DeriveFunctor where
+
   data D a = D a deriving (Functor, Show)
 
   main = let d' = fmap (+ 1) (D 1) in
@@ -113,94 +161,163 @@ Make =Functor= instances automatically derivable.
 * TODO =DeriveGeneric=                                                  :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveGeneric.hs
-{-# LANGUAGE DeriveGeneric #-}
+  {-# LANGUAGE DeriveGeneric #-}
+
+  module Every.Extension.DeriveGeneric where
 #+end_src
 
 * TODO =DeriveLift=                                             :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveLift.hs
-{-# LANGUAGE DeriveLift #-}
+  {-# LANGUAGE DeriveLift #-}
+
+  module Every.Extension.DeriveLift where
 #+end_src
 
 * TODO =DeriveTraversable=                                              :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DeriveTraversable.hs
-{-# LANGUAGE DeriveTraversable #-}
+  {-# LANGUAGE DeriveTraversable #-}
+
+  module Every.Extension.DeriveTraversable where
 #+end_src
 
 * TODO =DoAndIfThenElse=                                                :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/DoAndIfThenElse.hs
-{-# LANGUAGE DoAndIfThenElse #-}
+  {-# LANGUAGE DoAndIfThenElse #-}
+
+  module Every.Extension.DoAndIfThenElse where
 #+end_src
 
 * TODO =EmptyDataDecls=                                                 :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/EmptyDataDecls.hs
-{-# LANGUAGE EmptyDataDecls #-}
+  {-# LANGUAGE EmptyDataDecls #-}
+
+  module Every.Extension.EmptyDataDecls where
 #+end_src
 
 * TODO =ExistentialQuantification=                                      :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/ExistentialQuantification.hs
-{-# LANGUAGE ExistentialQuantification #-}
+  {-# LANGUAGE ExistentialQuantification #-}
+
+  module Every.Extension.ExistentialQuantification where
 #+end_src
 
 * TODO =FlexibleContexts=                                               :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/FlexibleContexts.hs
-{-# LANGUAGE FlexibleContexts #-}
+  {-# LANGUAGE FlexibleContexts #-}
+
+  module Every.Extension.FlexibleContexts where
 #+end_src
 
 * TODO =FlexibleInstances=                                              :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/FlexibleInstances.hs
-{-# LANGUAGE FlexibleInstances #-}
+  {-# LANGUAGE FlexibleInstances #-}
+
+  module Every.Extension.FlexibleInstances where
 #+end_src
 
 * TODO =ForeignFunctionInterface=                               :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/ForeignFunctionInterface.hs
-{-# LANGUAGE ForeignFunctionInterface #-}
+  {-# LANGUAGE ForeignFunctionInterface #-}
+
+  module Every.Extension.ForeignFunctionInterface where
 #+end_src
 
 * TODO =FunctionalDependencies=                                         :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/FunctionalDependencies.hs
-{-# LANGUAGE FunctionalDependencies #-}
+  {-# LANGUAGE FunctionalDependencies #-}
+
+  module Every.Extension.FunctionalDependencies where
 #+end_src
 
 * DONE =GADTs=                                                          :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/GADTs.hs
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE EmptyDataDeriving #-}
+  {-# LANGUAGE FlexibleInstances #-}
+  {-# LANGUAGE FunctionalDependencies #-}
+  {-# LANGUAGE GADTs #-}
+  {-# LANGUAGE StandaloneDeriving #-}
+  {-# LANGUAGE MultiParamTypeClasses #-}
+  {-# LANGUAGE EmptyDataDeriving #-}
 
-data Term a where
-    Lit    :: Int -> Term Int
-    Succ   :: Term Int -> Term Int
-    IsZero :: Term Int -> Term Bool
-    If     :: Term Bool -> Term a -> Term a -> Term a
-    Pair   :: Term a -> Term b -> Term (a,b)
+  module Every.Extension.GADTs where
+
+  class Boxed a b | a -> b where
+    unbox :: a -> b
+
+  data Calc a where
+    CInt :: Int -> Calc Int
+    CBool :: Bool -> Calc Bool
+    Add :: Calc Int -> Calc Int -> Calc Int
+    Mul :: Calc Int -> Calc Int -> Calc Int
+    If :: Calc Bool -> Calc a -> Calc a -> Calc a
+    And :: Calc Bool -> Calc Bool -> Calc Bool
+    Or :: Calc Bool -> Calc Bool -> Calc Bool
+    Gt :: Calc Int -> Calc Int -> Calc Bool
+    Lt :: Calc Int -> Calc Int -> Calc Bool
+    Eq :: Calc a -> Calc a -> Calc Bool
+
+  deriving instance Show (Calc a)
+
+  instance Boxed (Calc a) (Either Int Bool) where
+    unbox (CInt i) = Left i
+    unbox (CBool b) = Right b
+    unbox x = unbox $ eval x
+
+  -- | Eval a Calc to its terminal form, that is, either a Calc Int or a
+  -- Calc Bool.  To extract the value, use unbox.
+  eval :: Calc a -> Calc a
+  eval i@(CInt _) = i
+  eval b@(CBool _) = b
+  eval (Add (CInt a) (CInt b)) = CInt $ a + b
+  eval (Add a b) = eval $ Add (eval a) (eval b)
+  eval (Mul (CInt a) (CInt b)) = CInt $ a * b
+  eval (Mul a b) = eval $ Mul (eval a) (eval b)
+  eval (And (CBool a) (CBool b)) = CBool $ a && b
+  eval (And a b) = eval $ And (eval a) (eval b)
+  eval (Or (CBool a) (CBool b)) = CBool $ a && b
+  eval (Or a b) = eval $ Or (eval a) (eval b)
+  eval (If (CBool c) a b) = if c then a else b
+  eval (If c a b) = eval $ If (eval c) a b
+  eval (Gt (CInt a) (CInt b)) = CBool $ a > b
+  eval (Gt a b) = eval $ Gt (eval a) (eval b)
+  eval (Lt (CInt a) (CInt b)) = CBool $ a < b
+  eval (Lt a b) = eval $ Lt (eval a) (eval b)
+  eval (Eq (CInt a) (CInt b)) = CBool (a == b)
+  eval (Eq (CBool a) (CBool b)) = CBool (a == b)
+  eval (Eq a b) = eval $ Eq (eval a) (eval b)
 #+end_src
 
 * TODO =GeneralizedNewtypeDeriving=                                     :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/GeneralizedNewtypeDeriving.hs
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+  {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+  module Every.Extension.GeneralizedNewtypeDeriving where
 #+end_src
 
 * TODO =InstanceSigs=                                                   :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/InstanceSigs.hs
-{-# LANGUAGE InstanceSigs #-}
+  {-# LANGUAGE InstanceSigs #-}
+
+  module Every.Extension.InstanceSigs where
 #+end_src
 
 * TODO =KindSignatures=                                                 :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/KindSignatures.hs
-{-# LANGUAGE KindSignatures #-}
+  {-# LANGUAGE KindSignatures #-}
+
+  module Every.Extension.KindSignatures where
 #+end_src
 
 * =LambdaCase=                                                          :rio:
@@ -209,6 +326,8 @@ A shorthand for ~\x -> case x of …~
 
 #+begin_src haskell :tangle src/Every/Extension/LambdaCase.hs
   {-# LANGUAGE LambdaCase #-}
+
+  module Every.Extension.LambdaCase where
 
   annotedIntegers = fmap (\case 0 -> "Nothing"
                                 1 -> "Unit"
@@ -220,19 +339,25 @@ A shorthand for ~\x -> case x of …~
 * TODO =MagicHash=                                              :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/MagicHash.hs
-{-# LANGUAGE MagicHash #-}
+  {-# LANGUAGE MagicHash #-}
+
+  module Every.Extension.MagicHash where
 #+end_src
 
 * TODO =MonadFailDesugaring=                                            :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/MonadFailDesugaring.hs
-{-# LANGUAGE MonadFailDesugaring #-}
+  {-# LANGUAGE MonadFailDesugaring #-}
+
+  module Every.Extension.MonadFailDesugaring where
 #+end_src
 
 * TODO =MultiParamTypeClasses=                                          :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/MultiParamTypeClasses.hs
-{-# LANGUAGE MultiParamTypeClasses #-}
+  {-# LANGUAGE MultiParamTypeClasses #-}
+
+  module Every.Extension.MultiParamTypeClasses where
 #+end_src
 
 * DONE =MultiWayIf=                                                     :rio:
@@ -242,6 +367,8 @@ can use =otherwise=.
 
 #+begin_src haskell :tangle src/Every/Extension/MultiWayIf.hs
   {-# LANGUAGE MultiWayIf #-}
+
+  module Every.Extension.MultiWayIf where
 
   test :: Int -> String
   test a = if | a == 1 -> "Absolute unit."
@@ -264,6 +391,8 @@ Name elision.
 #+begin_src haskell :tangle src/Every/Extension/NamedFieldPuns.hs
   {-# LANGUAGE NamedFieldPuns #-}
 
+  module Every.Extension.NamedFieldPuns where
+
   data D = D { a :: Int
              , b :: String }
     deriving (Show)
@@ -278,6 +407,8 @@ Do not import the implicit Prelude.
 
 #+begin_src haskell :tangle src/Every/Extension/NoImplicitPrelude.hs
   {-# LANGUAGE NoImplicitPrelude #-}
+
+  module Every.Extension.NoImplicitPrelude where
 
   import Data.Maybe (Maybe (..), fromJust)
   import System.IO (putStrLn)
@@ -305,13 +436,17 @@ This is implied if the import of the Prelude, or of parts of the Prelude, is mad
 * TODO =OverloadedStrings=                                              :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/OverloadedStrings.hs
-{-# LANGUAGE OverloadedStrings #-}
+  {-# LANGUAGE OverloadedStrings #-}
+
+  module Every.Extension.OverloadedStrings where
 #+end_src
 
 * TODO =PackageImports=                                         :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/PackageImports.hs
-{-# LANGUAGE PackageImports #-}
+  {-# LANGUAGE PackageImports #-}
+
+  module Every.Extension.PackageImports where
 #+end_src
 
 * DONE =PartialTypeSignatures=                                          :rio:
@@ -322,6 +457,8 @@ that really matters.
 #+begin_src haskell :tangle src/Every/Extension/PartialTypeSignatures.hs
   {-# LANGUAGE PartialTypeSignatures #-}
 
+  module Every.Extension.PartialTypeSignatures where
+
   func :: _ -> Bool
   func = not
 #+end_src
@@ -329,25 +466,33 @@ that really matters.
 * TODO =PatternGuards=                                                  :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/PatternGuards.hs
-{-# LANGUAGE PatternGuards #-}
+  {-# LANGUAGE PatternGuards #-}
+
+  module Every.Extension.PatternGuards where
 #+end_src
 
 * TODO =PolyKinds=                                                      :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/PolyKinds.hs
-{-# LANGUAGE PolyKinds #-}
+  {-# LANGUAGE PolyKinds #-}
+
+  module Every.Extension.PolyKinds where
 #+end_src
 
 * TODO =QuasiQuotes=                                            :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/QuasiQuotes.hs
-{-# LANGUAGE QuasiQuotes #-}
+  {-# LANGUAGE QuasiQuotes #-}
+
+  module Every.Extension.QuasiQuotes where
 #+end_src
 
 * TODO =RankNTypes=                                                     :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/RankNTypes.hs
-{-# LANGUAGE RankNTypes #-}
+  {-# LANGUAGE RankNTypes #-}
+
+  module Every.Extension.RankNTypes where
 #+end_src
 
 * DONE =RecordWildCards=                                                :rio:
@@ -357,6 +502,8 @@ pattern match.
 
 #+begin_src haskell :tangle src/Every/Extension/RecordWildCards.hs
   {-# LANGUAGE RecordWildCards #-}
+
+  module Every.Extension.RecordWildCards where
 
   data Book = Book
     {
@@ -399,22 +546,46 @@ pattern match.
   book = Book "The Wizard of Oz" "L. Frank Baum" 1900 True
 #+end_src
 
-* TODO =ScopedTypeVariables=                                            :rio:
+* DONE =ScopedTypeVariables=                                            :rio:
+
+Type variables are unscoped by default, so this doesn't typecheck (from /Thinking in Types/):
+
+#+begin_example haskell
+  broken :: (a -> b) -> a -> b
+  broken f a = apply
+    where
+      apply :: b -- this b is not the same as the one in broken ::
+      apply = f a
+#+end_example
+
+With =ScopedTypeVariables=, scopes are introduced with the new keyword =forall=.
 
 #+begin_src haskell :tangle src/Every/Extension/ScopedTypeVariables.hs
-{-# LANGUAGE ScopedTypeVariables #-}
+  {-# LANGUAGE ScopedTypeVariables #-}
+
+  module Every.Extension.ScopedTypeVariables where
+
+  unbroken :: forall a b. (a -> b) -> a -> b
+  unbroken f a = apply
+    where
+      apply :: b
+      apply = f a
 #+end_src
 
 * TODO =StandaloneDeriving=                                             :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/StandaloneDeriving.hs
-{-# LANGUAGE StandaloneDeriving #-}
+  {-# LANGUAGE StandaloneDeriving #-}
+
+  module Every.Extension.StandaloneDeriving where
 #+end_src
 
 * TODO =StaticPointers=                                         :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/StaticPointers.hs
-{-# LANGUAGE StaticPointers #-}
+  {-# LANGUAGE StaticPointers #-}
+
+  module Every.Extension.StaticPointers where
 #+end_src
 
 * TODO =TemplateHaskell=                                        :rio_norecom:
@@ -422,47 +593,112 @@ pattern match.
 Metaprogramming.  This is one of the complex ones,
 
 #+begin_src haskell :tangle src/Every/Extension/TemplateHaskell.hs
-{-# LANGUAGE TemplateHaskell #-}
+  {-# LANGUAGE TemplateHaskell #-}
+
+  module Every.Extension.TemplateHaskell where
 #+end_src
 
 * TODO =TupleSections=                                                  :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/TupleSections.hs
-{-# LANGUAGE TupleSections #-}
+  {-# LANGUAGE TupleSections #-}
+
+  module Every.Extension.TupleSections where
 #+end_src
+
+* TODO =TypeApplications=
+
+Directly apply type to expressions.
+
+#+begin_src haskell :tangle src/Every/Extension/TypeFamilies.hs
+  {-# LANGUAGE TypeApplications #-}
+
+  module Every.Extension.TypeApplications where
+
+  maybeMap = fmap @Maybe -- fmap, but only over Maybe.
+  maybeMap = fmap @_ @_ @Int -- Functor f => (a -> Int) -> f a -> f Int
+#+end_src
+
+Types are given in the order they're declared in the expression (here
+f comes first because it appears first in the constraint). (This means
+that changing the order of type variables will break code).  These are NOT equivalent with regard to =TypeApplications=:
+
+#+begin_example
+  (Monad m, Monoid d) => m d
+  (Monoid d, Monad m) => m d
+#+end_example
 
 * TODO =TypeFamilies=                                                   :rio:
 
+TypeFamilies allow indexing types to types
+
+GHC Wiki:
+
+#+begin_quote
+  Type families come in two flavors: data families and type synonym
+  families. Data families are the indexed form of data and newtype
+  definitions. Type synonym families are the indexed form of type
+  synonyms.
+#+end_quote
+
+
 #+begin_src haskell :tangle src/Every/Extension/TypeFamilies.hs
-{-# LANGUAGE TypeFamilies #-}
+  {-# LANGUAGE TypeFamilies #-}
+
+  module Every.Extension.TypeFamilies where
 #+end_src
 
-* TODO =TypeOperators=                                          :rio_norecom:
+* DONE =TypeOperators=                                          :rio_norecom:
+
+Purely cosmetic: Allows to create infix types:
 
 #+begin_src haskell :tangle src/Every/Extension/TypeOperators.hs
-{-# LANGUAGE TypeOperators #-}
+  {-# LANGUAGE TypeOperators #-}
+
+  module Every.Extension.TypeOperators where
+
+  data a & b = Sum a b
+  data a || b = This a | That b
+
+  twoInts :: Int & Int
+  twoInts = Sum 3 12
+
+  intOrFloat :: Int || Float
+  intOrFloat = That 3.14
+
+  validate :: Int -> String `Either` ()
+  validate 0 = Left "No zero allowed."
+  validate _ = Right ()
 #+end_src
 
 * TODO =TypeSynonymInstances=                                           :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/TypeSynonymInstances.hs
-{-# LANGUAGE TypeSynonymInstances #-}
+  {-# LANGUAGE TypeSynonymInstances #-}
+
+  module Every.Extension.TypeSynonymInstances where
 #+end_src
 
 * TODO =UnboxedTuples=                                          :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/UnboxedTuples.hs
-{-# LANGUAGE UnboxedTuples #-}
+  {-# LANGUAGE UnboxedTuples #-}
+
+  module Every.Extension.UnboxedTuples where
 #+end_src
 
 * TODO =UnliftedFFITypes=                                       :rio_norecom:
 
 #+begin_src haskell :tangle src/Every/Extension/UnliftedFFITypes.hs
-{-# LANGUAGE UnliftedFFITypes #-}
+  {-# LANGUAGE UnliftedFFITypes #-}
+
+  module Every.Extension.UnliftedFFITypes where
 #+end_src
 
 * TODO =ViewPatterns=                                                   :rio:
 
 #+begin_src haskell :tangle src/Every/Extension/ViewPatterns.hs
-{-# LANGUAGE ViewPatterns #-}
+  {-# LANGUAGE ViewPatterns #-}
+
+  module Every.Extension.ViewPatterns where
 #+end_src
